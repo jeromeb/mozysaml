@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SAML AuthnRequest Generator</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/script.js"></script>
+</head>
+
+<body ng-app="samlGen" ng-controller="main">
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <a class="navbar-brand" href="index.php">Mozy Fedid SAML AuthnRequest Generator</a>
+        </div>
+    </div>
+    <div class="jumbotron">
+        <div class="container">
+            <p></p>
+            <p>Generate a SAMLRequest Payload (AuthnRequest) for SAML Identity Provider such as MS Azure AD or Google SAML Apps</p>
+            <div class="row">
+                <div class="col-lg-8">
+                    <form class="form-horizontal" name="samlForm">
+                        <div class="form-group">
+                            <label for="domain">Mozy Account Type:</label>
+                            <select class="form-control" name="domain" ng-model="saml.domain" ng-init="saml.domain = '.mozyenterprise.com'" ng-change="submitSAML(saml)">
+                                <option value=".mozyenterprise.com" selected="selected">MozyEnterprise</option>
+                                <option value=".mozy.com">Mozy Dell</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="subdomain">Mozy Subdomain Name:</label>
+                            <input type="text" class="form-control" id="subdomain" name="subdomain" ng-model="saml.subdomain" placeholder="Enter Mozy Subdomain" ng-change="submitSAML(saml)" required>
+                            <small ng-show="samlForm.subdomain.$valid" class="form-text text-muted">Your full Mozy subdomain URL is https://{{saml.subdomain}}{{saml.domain}}</small>
+                        </div>
+                        <div class="form-group" ng-cloak>
+                            <label for="domain">SAML Idendity Provider:</label>
+                            <select class="form-control" name="idp" ng-model="saml.idp" ng-init="saml.idp = {value: 'ms',label: 'Microsoft Azure AD'}" ng-options="identityProvider as identityProvider.label for identityProvider in identityProviders track by identityProvider.value" ng-change="submitSAML(saml)"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="idpid">SAML Idendity Provider ID:</label>
+                            <input type="text" class="form-control" id="idpid" name="idpid" ng-model="saml.idpid" placeholder="Enter the Idendity Provider ID" ng-change="submitSAML(saml)" required>
+                            <br>
+                            <p>Find my Identity Povider ID for {{saml.idp.label}} :</p>
+                            <p ng-if="saml.idp.value == 'gg'"><a href="https://admin.google.com" target="_blank">https://admin.google.com</a> > Apps > SAML apps > YouAppName (Mozy) > Service Providers Details > Manage Certificates</p>
+                            <p ng-if="saml.idp.value == 'ms'"><a href="https://portal.azure.com" target="_blank">https://portal.azure.com</a> > Azure Active Directory > Properties > Directory ID</p>
+                            <img ng-src="img/{{saml.idp.value}}_idpid.png" style="width:100%">
+                        </div>
+                    </form>
+                    <br>
+                </div>
+            </div>
+            <div class="row">
+                <div class="row" ng-show="samlResult.authurl && !samlForm.$error.required">
+                    <!--                 	&& !samlForm.$error.required-->
+                    <p>Authentication URL to enter in Mozy SAML Configuration</p>
+                    <div class="col-lg-8">
+                        <h5>Authentication URL:</h5> <pre><code>{{samlResult.authurl}}</code></pre>
+                        <h5>SAML Endpoint:</h5><pre><code>{{samlResult.samlEndpoint}}</code></pre>
+                        <h5>URLs Configuration in Mozy</h5><img ng-src="img/{{saml.idp.value}}_mozy_auth.png" style="width:100%">
+                        <br>
+                        <br>
+                        <h5 style="display:inline;">SAML Request Decrypted:&nbsp;</h5><a ng-show="!showDecr" href="" ng-click="showDecr = !showDecr">Show</a><a href="" ng-click="showDecr = !showDecr" ng-show="showDecr">Hide</a>
+                        <br>
+                        <br>
+                        <span ng-show="showDecr"><pre><code>{{samlResult.decryptedRequest}}</code></pre></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+<footer>
+    <div class="container">
+        © Mozy inc. 2018, jerome.bachelet@mozy.com
+    </div>
+</footer>
+
+</html>
